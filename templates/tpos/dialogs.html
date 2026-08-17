@@ -371,29 +371,28 @@
     <q-card class="q-pa-md">
       <div class="text-h6 q-mb-md">Payment Method</div>
       <div class="row q-col-gutter-sm q-pt-xs">
-        <div class="col-6">
+        <div class="col-12">
           <q-btn
             class="full-width q-px-lg q-py-sm"
             size="xl"
             color="primary"
+            margin="md"
             rounded
             aria-label="Lightning Network"
             @click="selectPaymentMethod('btc')"
           >
             <div class="row items-center no-wrap q-gutter-x-sm">
-              <span
-                class="text-h4 text-weight-bold"
-                v-text="bitcoinSymbol"
-              ></span>
-              <span class="text-subtitle1 text-weight-medium">Lightning</span>
+              <q-icon name="card_membership" size="30px"></q-icon>
+              <span class="text-subtitle1 text-weight-medium">CLUB WALLET</span>
             </div>
           </q-btn>
         </div>
-        <div class="col-6" v-if="onchainEnabled">
+        <div class="col-12" v-if="onchainEnabled">
           <q-btn
             class="full-width q-px-lg q-py-sm"
             size="xl"
             color="primary"
+            margin="md"
             rounded
             aria-label="Bitcoin Onchain"
             @click="selectPaymentMethod('btc_onchain')"
@@ -407,29 +406,12 @@
             </div>
           </q-btn>
         </div>
-        <div class="col-6" v-if="fiatProvider">
+        <div class="col-12" v-if="allowCashSettlement && currency != 'sats'">
           <q-btn
             class="full-width q-px-lg q-py-sm"
             size="xl"
             color="secondary"
-            rounded
-            :aria-label="currency + ' QR'"
-            @click="selectPaymentMethod('fiat')"
-          >
-            <div class="row items-center no-wrap q-gutter-x-xs">
-              <span
-                class="text-h5 text-weight-bold"
-                v-text="currencySymbol"
-              ></span>
-              <q-icon name="qr_code" size="30px"></q-icon>
-            </div>
-          </q-btn>
-        </div>
-        <div class="col-6" v-if="allowCashSettlement && currency != 'sats'">
-          <q-btn
-            class="full-width q-px-lg q-py-sm"
-            size="xl"
-            color="secondary"
+            margin="md"
             rounded
             :aria-label="currency + ' TAP'"
             @click="selectPaymentMethod('cash')"
@@ -443,11 +425,12 @@
             </div>
           </q-btn>
         </div>
-        <div class="col-6" v-if="fiatProvider">
+        <div class="col-12" v-if="fiatProvider">
           <q-btn
             class="full-width q-px-lg q-py-sm"
             size="xl"
             color="secondary"
+            margin="md"
             rounded
             :aria-label="`CASH ${currency}`"
             @click="selectPaymentMethod('fiat_tap')"
