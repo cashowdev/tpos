@@ -15,9 +15,6 @@
       </div>
       <div class="col-12 text-center">
         <h3 class="q-mb-md" v-text="totalFormatted"></h3>
-        <h5 v-show="!denomIsSats" class="q-mt-none q-mb-sm">
-          <span v-text="totalfsat"></span><small> sat</small>
-        </h5>
       </div>
       <div class="col-12" :style="drawerItemsHeight">
         <table class="table full-width" virtual-scroll>
@@ -234,7 +231,7 @@
       <!-- sm+ : keep original fixed card size -->
       <div class="flex justify-center q-col-gutter-sm q-mt-md gt-xs">
         <div
-          style="height: 150px; width: 150px"
+          class="quickfixjohn"
           v-for="item in filteredItems"
           :key="item.id"
           v-show="matchesCategoryFilter(item)"
@@ -331,21 +328,13 @@
   </div>
   <q-page-sticky position="bottom" :offset="[0, 22]" v-if="cart.size > 0">
     <q-btn
-      color="primary"
-      size="sm"
-      padding="md"
-      label="Hold Cart"
-      style="width: 90px"
-      class="q-mr-sm"
-      :disabled="cart.size == 0"
-      @click="holdCart"
-    ></q-btn>
-    <q-btn
-      color="primary"
       size="sm"
       padding="md"
       label="Checkout"
-      style="width: 90px"
+      color="positive"
+      label="Pay"
+      padding="md"
+      style="width: 180px"
       @click="cartDrawer = !cartDrawer"
     ></q-btn>
   </q-page-sticky>
