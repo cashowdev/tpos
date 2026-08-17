@@ -33,3 +33,30 @@ Ongewijzigd gebleven: de Onchain-knop, de cash/TAP-knop en de fiat_tap-knop (beh
 | # | Wijziging | Reden |
 |---|---|---|
 | | | |
+
+---
+
+## v1.5.0-cashow.2
+
+### `templates/tpos/tpos.html`
+
+| # | Wijziging | Reden |
+|---|---|---|
+| 1 | CSS-klasse `.quickfixjohn` toegevoegd (10 items per rij) | vaste kaartbreedte vervangen door een breedte in tienden |
+
+### `templates/tpos/_cart.html`
+
+| # | Wijziging | Reden |
+|---|---|---|
+| 1 | Sats-subtotaal onder het totaal in de winkelwagen verwijderd | club werkt in euro, sats zijn ruis aan de kassa |
+| 2 | Vaste kaart van 150x150 vervangen door `.quickfixjohn` | meer items per rij, schaalt mee met het scherm |
+| 3 | Knop "Hold Cart" verwijderd | niet gebruikt |
+| 4 | Checkout-knop herwerkt: groen, breder (180px) | duidelijker aan de kassa |
+| 5 | Dubbele `label` en `padding` op die knop opgeruimd | bij dubbele attributen wint de eerste, de tweede was dode code |
+
+### `templates/tpos/dialogs.html`
+
+| # | Wijziging | Reden |
+|---|---|---|
+| 1 | Sats-bedrag verwijderd uit de lijst met laatste betalingen | zelfde reden als hierboven |
+| 2 | Overgebleven `</q-item-label>` weggehaald | tags waren niet in balans, 11 open tegenover 12 gesloten |
