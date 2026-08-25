@@ -247,6 +247,15 @@ window.app = Vue.createApp({
     }
   },
   computed: {
+    // cashow: 'CASH' of 'CUSTOM' in de titel van de validatie-modal
+    internalFiatMethod() {
+      const request =
+        this.invoiceDialog.data && this.invoiceDialog.data.payment_request
+      return request === 'cash' || request === 'custom' ? request : null
+    },
+    internalFiatMethodLabel() {
+      return (this.internalFiatMethod || 'cash').toUpperCase()
+    },
     activePaymentAmount() {
       return this.paymentAmount !== null ? this.paymentAmount : this.amount
     },
@@ -401,6 +410,7 @@ window.app = Vue.createApp({
           lightning_payment_request:
             paymentRequest &&
             paymentRequest !== 'cash' &&
+            paymentRequest !== 'custom' &&
             paymentRequest !== 'tap_to_pay'
               ? paymentRequest
               : null,
@@ -416,6 +426,7 @@ window.app = Vue.createApp({
           ? null
           : paymentData.payment_request &&
               paymentData.payment_request !== 'cash' &&
+              paymentData.payment_request !== 'custom' &&
               paymentData.payment_request !== 'tap_to_pay'
             ? paymentData.payment_request
             : paymentData.bolt11
@@ -990,6 +1001,11 @@ window.app = Vue.createApp({
             this.fiatMethod = 'cash'
             method = 'fiat'
             break
+          // cashow: administratieve betaalmethode, zelfde flow als cash
+          case 'custom':
+            this.fiatMethod = 'custom'
+            method = 'fiat'
+            break
           case 'btc':
           case 'btc_onchain':
             this.fiatMethod = 'checkout'
@@ -1096,11 +1112,13 @@ window.app = Vue.createApp({
     async validateCashInvoice() {
       const paymentHash = this.invoiceDialog.data.payment_hash
       if (!paymentHash || this.cashValidating) return
+      // cashow: dezelfde knop valideert zowel cash als custom
+      const method = this.internalFiatMethod || 'cash'
       this.cashValidating = true
       try {
         await LNbits.api.request(
           'POST',
-          `/tpos/api/v1/tposs/${this.tposId}/invoices/${paymentHash}/cash/validate`
+          `/tpos/api/v1/tposs/${this.tposId}/invoices/${paymentHash}/${method}/validate`
         )
       } catch (error) {
         LNbits.utils.notifyApiError(error)

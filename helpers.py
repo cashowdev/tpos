@@ -2,6 +2,14 @@ import json
 
 from loguru import logger
 
+# cashow: administratieve fiat-methodes. Deze maken een interne invoice aan die
+# door de kassier gevalideerd wordt in plaats van door een betaalprovider.
+# De waarde komt terecht in payment.extra["fiat_method"].
+INTERNAL_FIAT_METHODS = ("cash", "custom")
+
+# cashow: kleur van het label dat LNbits op deze betalingen zet
+INTERNAL_FIAT_LABEL_COLORS = {"cash": "#FFC107", "custom": "#7E57C2"}
+
 
 def from_csv(value: str | None, separator: str = ",") -> list[str]:
     if not value:

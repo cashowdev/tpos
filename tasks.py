@@ -19,6 +19,7 @@ from .crud import (
     get_tpos_payment_by_hash,
     update_tpos_payment,
 )
+from .helpers import INTERNAL_FIAT_METHODS
 from .services import (
     deduct_inventory_stock,
     fetch_onchain_balance,
@@ -204,8 +205,8 @@ async def process_paid_tpos_payment(
 def _payment_method(payment: Payment) -> str:
     if payment.extra.get("payment_method"):
         return str(payment.extra["payment_method"])
-    if payment.extra.get("fiat_method") == "cash":
-        return "cash"
+    if payment.extra.get("fiat_method") in INTERNAL_FIAT_METHODS:
+        return str(payment.extra["fiat_method"])
     if payment.extra.get("fiat_payment_request", "").startswith("pi_"):
         return "fiat"
     return "lightning"
