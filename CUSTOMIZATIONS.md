@@ -60,3 +60,52 @@ Ongewijzigd gebleven: de Onchain-knop, de cash/TAP-knop en de fiat_tap-knop (beh
 |---|---|---|
 | 1 | Sats-bedrag verwijderd uit de lijst met laatste betalingen | zelfde reden als hierboven |
 | 2 | Overgebleven `</q-item-label>` weggehaald | tags waren niet in balans, 11 open tegenover 12 gesloten |
+
+---
+
+## v1.5.0-cashow.3
+
+Nieuwe administratieve betaalmethode **custom**, naast de bestaande cash-settlement.
+Een betaling die zo aangemaakt wordt krijgt `fiat_method: "custom"` in `payment.extra`.
+
+### `helpers.py`
+
+| # | Wijziging | Reden |
+|---|---|---|
+| 1 | `INTERNAL_FIAT_METHODS = ("cash", "custom")` toegevoegd | één plek waar de administratieve methodes staan, zodat er later makkelijk een bijkomt |
+| 2 | `INTERNAL_FIAT_LABEL_COLORS` toegevoegd | eigen kleur voor het label dat LNbits op deze betalingen zet |
+
+### `views_api.py`
+
+| # | Wijziging | Reden |
+|---|---|---|
+| 1 | Invoice-aanmaak werkt op `INTERNAL_FIAT_METHODS` in plaats van op de string `"cash"` | custom volgt dezelfde interne-invoice flow |
+| 2 | `checking_id` wordt `internal_<methode>_<hash>` | onderscheid tussen cash en custom |
+| 3 | `_payment_method_from_payment` geeft de methode zelf terug | zodat `payment_request` op `custom` komt |
+| 4 | Validatie verhuisd naar `_validate_internal_fiat_invoice` | gedeelde logica voor beide routes |
+| 5 | Nieuwe route `POST /api/v1/tposs/{id}/invoices/{hash}/custom/validate` | `/cash/validate` blijft ongewijzigd bestaan |
+
+### `tasks.py`
+
+| # | Wijziging | Reden |
+|---|---|---|
+| 1 | `_payment_method` herkent custom | correcte methode op de bon en bij de doorstroming naar Orders |
+
+### `templates/tpos/dialogs.html`
+
+| # | Wijziging | Reden |
+|---|---|---|
+| 1 | Knop **CUSTOM** toegevoegd onder de cash-knop | administratieve boeking zonder echte fiat-provider |
+| 2 | Validatie-modal toont `CUSTOM EUR` of `CASH EUR` | duidelijk voor de kassier wat hij bevestigt |
+
+### `static/js/tpos.js`
+
+| # | Wijziging | Reden |
+|---|---|---|
+| 1 | `internalFiatMethod` en `internalFiatMethodLabel` als computed | bepaalt de titel van de modal en de route bij validatie |
+| 2 | `case 'custom'` in `selectPaymentMethod` | zet `fiatMethod` op custom en behandelt het verder als fiat |
+| 3 | `validateCashInvoice` roept `/cash/validate` of `/custom/validate` aan | één knop voor beide methodes |
+
+**Zichtbaarheid**: de CUSTOM-knop volgt dezelfde regel als de cash-knop,
+`allowCashSettlement && currency != 'sats'`. De backend eist net als bij cash
+een super-user-account op de wallet.
