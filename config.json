@@ -1,6 +1,6 @@
 {
   "id": "tpos",
-  "version": "1.5.0-cashow.3",
+  "version": "1.5.0-cashow.4",
   "name": "TPoS (Cashow)",
   "repo": "https://github.com/cashowdev/tpos",
   "short_description": "Cashow fork van de shareable PoS terminal",

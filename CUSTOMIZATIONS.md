@@ -109,3 +109,17 @@ Een betaling die zo aangemaakt wordt krijgt `fiat_method: "custom"` in `payment.
 **Zichtbaarheid**: de CUSTOM-knop volgt dezelfde regel als de cash-knop,
 `allowCashSettlement && currency != 'sats'`. De backend eist net als bij cash
 een super-user-account op de wallet.
+
+---
+
+## v1.5.0-cashow.4
+
+Alleen visueel, geen functionele wijziging.
+
+### `templates/tpos/dialogs.html` - Payment Method dialog
+
+| # | Wijziging | Reden |
+|---|---|---|
+| 1 | `q-mb-md` op alle vijf de knoppen | meer ruimte ertussen, minder kans op een misklik op de verkeerde betaalmethode |
+| 2 | Attribuut `margin="md"` verwijderd | bestaat niet als q-btn-property, deed niets |
+| 3 | Custom-knop: plus-icoon en tekstlabel CUSTOM weg, `qr_code`-icoon in de plaats | zelfde opbouw als de andere fiat-knoppen, valutasymbool plus icoon |
