@@ -123,3 +123,20 @@ Alleen visueel, geen functionele wijziging.
 | 1 | `q-mb-md` op alle vijf de knoppen | meer ruimte ertussen, minder kans op een misklik op de verkeerde betaalmethode |
 | 2 | Attribuut `margin="md"` verwijderd | bestaat niet als q-btn-property, deed niets |
 | 3 | Custom-knop: plus-icoon en tekstlabel CUSTOM weg, `qr_code`-icoon in de plaats | zelfde opbouw als de andere fiat-knoppen, valutasymbool plus icoon |
+
+---
+
+## v1.5.0-cashow.5
+
+Alleen labels, geen functionele wijziging.
+
+### `templates/tpos/dialogs.html` - Payment Method dialog
+
+| # | Knop | Wijziging |
+|---|---|---|
+| 1 | `cash` | label **CASH** naast het `toll`-icoon |
+| 2 | `custom` | label **QR STICKER** naast het `qr_code`-icoon |
+| 3 | `fiat_tap` | icoon `phone_android` erbij en label **BANK**, `credit_card` blijft |
+
+Reden: aan de kassa moet in één oogopslag duidelijk zijn welke knop welke
+betaalwijze is, iconen alleen waren te dubbelzinnig.
