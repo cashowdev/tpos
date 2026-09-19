@@ -140,3 +140,16 @@ Alleen labels, geen functionele wijziging.
 
 Reden: aan de kassa moet in één oogopslag duidelijk zijn welke knop welke
 betaalwijze is, iconen alleen waren te dubbelzinnig.
+
+---
+
+## v1.5.0-cashow.6
+
+Alleen CSS, geen functionele wijziging.
+
+### `templates/tpos/tpos.html`
+
+| # | Wijziging | Reden |
+|---|---|---|
+| 1 | `.quickfixjohn` van `calc(100% / 10)` naar `calc(100% / 7)` | zeven items per rij in plaats van tien, dus grotere tegels om aan te tikken |
+| 2 | Nieuwe regel `.quickfixjohn .q-badge { font-size: 3em }` | het aantal in de tegel was te klein om vanop afstand te lezen |
