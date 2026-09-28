@@ -14,13 +14,18 @@ from lnbits.core.crud import (
     get_user,
     get_wallet,
 )
-from lnbits.core.crud.payments import update_payment_checking_id
+from lnbits.core.crud.payments import update_payment, update_payment_checking_id
 from lnbits.core.crud.users import (
     get_user_access_control_lists,
     update_account,
     update_user_access_control_list,
 )
-from lnbits.core.models import CreateInvoice, Payment, WalletTypeInfo
+from lnbits.core.models import (
+    CreateInvoice,
+    Payment,
+    PaymentState,
+    WalletTypeInfo,
+)
 from lnbits.core.models.misc import SimpleItem
 from lnbits.core.models.users import (
     AccessControlList,
@@ -925,6 +930,13 @@ async def _validate_internal_fiat_invoice(
         )
     if payment.success:
         return {"success": True}
+    # cashow: zet de betaling eerst in de database op betaald en dispatch pas
+    # daarna. internal_invoice_queue is een queue in het geheugen, dus zonder
+    # deze schrijving gaat de validatie verloren als het item niet verwerkt
+    # raakt en blijft de betaling voor altijd pending.
+    # Overgenomen van upstream e233038 "mark cash invoices paid before dispatch".
+    payment.status = PaymentState.SUCCESS
+    await update_payment(payment)
     await internal_invoice_queue_put(payment.checking_id)
     return {"success": True}
 
