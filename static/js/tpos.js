@@ -1135,9 +1135,11 @@ window.app = Vue.createApp({
       this.invoiceDialog.internalMemo = null
       this.clearCart()
       this.showComplete()
-      if (this.enablePrint) {
-        this.promptPrintType(paymentHash)
-      }
+      // cashow: de print-dialoog niet meer automatisch openen na een betaling.
+      // Printen blijft mogelijk via de bonnenhistoriek, waar de knoppen
+      // printReceipt en printOrderReceipt rechtstreeks aangeroepen worden.
+      // promptPrintType en printDialog blijven bewust staan, zodat deze
+      // wijziging één regel blijft bij een rebase op upstream.
     },
     startPaymentChecker(paymentHash) {
       if (this.invoiceDialog.paymentChecker) {
