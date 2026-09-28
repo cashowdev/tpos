@@ -153,3 +153,29 @@ Alleen CSS, geen functionele wijziging.
 |---|---|---|
 | 1 | `.quickfixjohn` van `calc(100% / 10)` naar `calc(100% / 7)` | zeven items per rij in plaats van tien, dus grotere tegels om aan te tikken |
 | 2 | Nieuwe regel `.quickfixjohn .q-badge { font-size: 3em }` | het aantal in de tegel was te klein om vanop afstand te lezen |
+
+---
+
+## v1.5.0-cashow.7
+
+### `views_api.py` - validatie van cash en custom
+
+| # | Wijziging | Reden |
+|---|---|---|
+| 1 | `payment.status = PaymentState.SUCCESS` plus `update_payment` vóór `internal_invoice_queue_put` | de validatie schreef niets naar de database en vertrouwde volledig op een queue in het geheugen. Raakte dat item niet verwerkt, dan bleef de betaling pending terwijl de kassier een geslaagde validatie zag. Overgenomen van upstream `e233038` |
+
+### `templates/tpos/tpos.html`
+
+| # | Wijziging | Reden |
+|---|---|---|
+| 1 | Sats-regel onder het bedrag verwijderd | de club rekent in euro, sats zijn ruis aan de kassa |
+| 2 | Sats-regel onder `Total` verwijderd | zelfde reden |
+
+### `static/js/tpos.js`
+
+| # | Wijziging | Reden |
+|---|---|---|
+| 1 | De print-dialoog opent niet meer automatisch na een betaling | die onderbrak de kassier bij elke transactie. Printen kan nog via de bonnenhistoriek, waar `printReceipt` en `printOrderReceipt` rechtstreeks aangeroepen worden |
+
+**Nog open, bewust niet in deze release**: de ATM-refund die stil faalt in
+`views_atm.py`. Zit ook nog in upstream, wordt apart aangepakt.
