@@ -27,18 +27,9 @@
           <h3 class="q-mb-md">
             <span v-text="amountFormatted"></span>
           </h3>
-          <h5
-            v-show="!denomIsSats && g.settings.denomination == 'sats'"
-            class="q-mt-none q-mb-sm"
-          >
-            <span v-text="fsat"> </span>
-            <small>&nbsp;sat</small>
-          </h5>
           <div v-if="total > 0.0">
             <h5 class="text-italic">
               <span v-text="`Total: ${totalFormatted}`"></span>
-              <br />
-              <span v-if="!denomIsSats" v-text="`${totalfsat} sat`"></span>
             </h5>
           </div>
         </div>
