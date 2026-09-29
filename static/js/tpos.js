@@ -61,6 +61,9 @@ window.app = Vue.createApp({
       hidePin: true,
       atmMode: false,
       atmToken: '',
+      // cashow: het bedrag dat de kassier bevestigd heeft via atmGetWithdraw.
+      // Een kaarttik wordt pas aanvaard als dit overeenkomt met this.sat.
+      atmConfirmedSat: 0,
       nfcTagReading: false,
       lnaddressDialog: {
         show: false,
@@ -795,6 +798,8 @@ window.app = Vue.createApp({
     },
     exitAtmMode() {
       this.atmMode = false
+      this.atmConfirmedSat = 0
+      this.stopNfcReader()
       this.getRates()
       this.cancelAddAmount()
     },
@@ -865,6 +870,8 @@ window.app = Vue.createApp({
             })
             return
           }
+          // cashow: vanaf hier is dit bedrag door de server bevestigd
+          this.atmConfirmedSat = this.sat
           const url = `${window.location.origin}/tpos/api/v1/lnurl/${this.atmToken}/${this.sat}`
           const bytes = new TextEncoder().encode(url)
           const bech32 = NostrTools.nip19.encodeBytes('lnurl', bytes)
@@ -889,6 +896,7 @@ window.app = Vue.createApp({
             if (e.data == 'paid') {
               this.invoiceDialog.show = false
               this.atmToken = ''
+              this.atmConfirmedSat = 0
               this.showComplete()
               this.atmMode = false
               this.connectionWithdraw.close()
@@ -921,6 +929,13 @@ window.app = Vue.createApp({
     closeInvoiceDialog() {
       this.stack = []
       this.cashValidating = false
+      // cashow: @hide vuurt vertraagd. Staat er intussen alweer een dialoog
+      // open, dan hoort dit event bij de vorige en mogen we de lezer en de
+      // bevestiging van de nieuwe cyclus niet weggooien.
+      if (!this.invoiceDialog.show) {
+        this.stopNfcReader()
+        this.atmConfirmedSat = 0
+      }
       this.resetPaymentAttempt()
       const dialog = this.invoiceDialog
       setTimeout(() => {
@@ -1192,6 +1207,19 @@ window.app = Vue.createApp({
         console.warn('TPoS payment websocket setup failed:', err)
       }
     },
+    stopNfcReader() {
+      // cashow: lezer afbreken en de vlag resetten, anders blokkeert
+      // nfcTagReading elke volgende readNfcTag()
+      if (this._nfcAbort) {
+        try {
+          this._nfcAbort.abort()
+        } catch (error) {
+          console.debug('Could not abort NFC reader:', error)
+        }
+        this._nfcAbort = null
+      }
+      this.nfcTagReading = false
+    },
     readNfcTag() {
       try {
         if (typeof NDEFReader == 'undefined') {
@@ -1209,6 +1237,10 @@ window.app = Vue.createApp({
 
         const ndef = new NDEFReader()
         const readerAbortController = new AbortController()
+        // cashow: bewaren zodat stopNfcReader() hem kan afbreken. Zonder dit
+        // bleef de lezer scherp staan na het sluiten van de dialoog en vuurde
+        // een latere tik af op een charge van een volgende cyclus.
+        this._nfcAbort = readerAbortController
         readerAbortController.signal.onabort = () => {
           console.debug('All NFC Read operations have been aborted.')
         }
@@ -1276,6 +1308,19 @@ window.app = Vue.createApp({
       }
     },
     makeWithdraw(payLink) {
+      // cashow: weiger een tik zolang het bedrag niet bevestigd is, of als het
+      // intussen gewijzigd is. Anders gaat de tik naar een charge zonder bedrag
+      // en faalt de uitbetaling stil.
+      if (!this.atmConfirmedSat || this.atmConfirmedSat !== this.sat) {
+        Quasar.Notify.create({
+          type: 'negative',
+          message: 'Confirm the amount first, then tap the card again.'
+        })
+        // de lezer stopte zichzelf bij het lezen, opnieuw starten zodat de
+        // kassier gewoon nog eens kan tikken
+        this.readNfcTag()
+        return
+      }
       if (!payLink) {
         Quasar.Notify.create({
           type: 'negative',
