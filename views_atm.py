@@ -102,6 +102,29 @@ async def api_tpos_atm_pay(
     request: Request, charge_id: str, amount: int, data: CreateWithdrawPay
 ) -> SimpleStatus:
     try:
+        # cashow: weiger een kaarttik waarvan het bedrag niet bevestigd is.
+        # Het bedrag wordt alleen gezet door GET /atm/withdraw/{charge}/{amount}.
+        # Zonder deze controle maakt de stap hieronder een invoice aan bij de
+        # klant die daarna nooit betaald kan worden, omdat lnurl_callback een
+        # charge zonder bedrag weigert. Het bedrag uit de URL hier overnemen is
+        # bewust niet gedaan: dan zou een tik met een oud bedrag alsnog uitbetalen.
+        lnurlcharge = await get_lnurlcharge(charge_id)
+        if not lnurlcharge:
+            raise HTTPException(
+                status_code=HTTPStatus.NOT_FOUND,
+                detail="Charge not found.",
+            )
+        if lnurlcharge.claimed:
+            raise HTTPException(
+                status_code=HTTPStatus.BAD_REQUEST,
+                detail="Charge already claimed.",
+            )
+        if lnurlcharge.amount != amount:
+            raise HTTPException(
+                status_code=HTTPStatus.BAD_REQUEST,
+                detail="Amount not confirmed. Confirm the amount, then tap the card.",
+            )
+
         res = await lnurl_handle(data.pay_link, user_agent="lnbits/tpos")
         if not isinstance(res, LnurlPayResponse):
             raise HTTPException(
@@ -128,21 +151,24 @@ async def api_tpos_atm_pay(
             maxWithdrawable=MilliSatoshi(amount * 1000),
             minWithdrawable=MilliSatoshi(amount * 1000),
         )
-        try:
-            res3 = await execute_withdraw(
-                withdraw_res, res2.pr, user_agent="lnbits/tpos"
+        # cashow: de fout van execute_withdraw niet meer opslokken. Voorheen
+        # werd hij enkel gelogd en kreeg de kassier alsnog "Withdraw processed
+        # successfully" te zien terwijl er niets uitbetaald was.
+        res3 = await execute_withdraw(withdraw_res, res2.pr, user_agent="lnbits/tpos")
+        if isinstance(res3, LnurlErrorResponse):
+            raise HTTPException(
+                status_code=HTTPStatus.BAD_REQUEST,
+                detail=f"Error processing withdraw: {res3.reason}",
             )
-            if isinstance(res3, LnurlErrorResponse):
-                raise HTTPException(
-                    status_code=HTTPStatus.BAD_REQUEST,
-                    detail=f"Error processing withdraw: {res3.reason}",
-                )
-        except Exception as exc:
-            logger.error(f"Error processing withdraw: {exc}")
 
         return SimpleStatus(success=True, message="Withdraw processed successfully.")
 
+    # cashow: laat een HTTPException zijn eigen boodschap houden, anders wordt
+    # elke controle hierboven alsnog een generieke 500.
+    except HTTPException:
+        raise
     except Exception as exc:
+        logger.error(f"Error processing atm withdraw: {exc}")
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
             detail="Cannot process atm withdraw",
