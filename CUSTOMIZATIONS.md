@@ -179,3 +179,38 @@ Alleen CSS, geen functionele wijziging.
 
 **Nog open, bewust niet in deze release**: de ATM-refund die stil faalt in
 `views_atm.py`. Zit ook nog in upstream, wordt apart aangepakt.
+
+---
+
+## v1.5.0-cashow.8
+
+Mislukte ATM-uitbetaling die als geslaagd gemeld werd. Aanleiding: een refund
+van 93.500 sats op 26 september die niet uitbetaald werd terwijl de kassier
+"Withdraw processed successfully" te zien kreeg.
+
+Beide bugs zitten ook nog in `upstream/main` van lnbits/tpos, dus dit is geen
+fout die in deze fork geïntroduceerd is.
+
+### `views_atm.py`
+
+| # | Wijziging | Reden |
+|---|---|---|
+| 1 | `api_tpos_atm_pay` controleert nu eerst de charge: bestaat, nog niet geclaimd, en `amount` komt overeen met de URL | het bedrag wordt alleen gezet door `GET /atm/withdraw/{charge}/{amount}`. Zonder die controle werd er een invoice aangemaakt bij de klant die `lnurl_callback` daarna weigerde, met de melding `has no amount specified` |
+| 2 | Het bedrag uit de URL wordt bewust **niet** overgenomen | een tik met een oud bedrag zou dan alsnog uitbetalen. Op 12 september was dat 100 sats geweest |
+| 3 | De fout van `execute_withdraw` wordt niet meer opgeslokt | voorheen werd hij enkel gelogd en kreeg de kassier toch succes te zien |
+| 4 | `except HTTPException: raise` vóór de algemene `except` | anders wordt elke controle hierboven alsnog een generieke 500 zonder bruikbare boodschap |
+
+### `static/js/tpos.js`
+
+| # | Wijziging | Reden |
+|---|---|---|
+| 1 | De `AbortController` van `readNfcTag` wordt bewaard en afgebroken via `stopNfcReader`, bij het sluiten van de dialoog en bij het verlaten van de ATM-modus | hij was een lokale variabele die alleen bij een lezing werd afgebroken. Een afgebroken cyclus liet de lezer scherp staan, waarna een latere tik afvuurde op de charge van een volgende cyclus. Dat is de directe oorzaak van 26 september |
+| 2 | `nfcTagReading` wordt mee gereset | bleef op true staan en blokkeerde elke volgende `readNfcTag` |
+| 3 | `atmConfirmedSat` onthoudt het door de server bevestigde bedrag, `makeWithdraw` weigert een tik die er niet mee overeenkomt | tweede slot, ook tegen een tik met een gewijzigd bedrag |
+| 4 | Na een geweigerde tik start de lezer opnieuw | anders moet de kassier de pagina herladen om opnieuw te kunnen tikken |
+| 5 | `closeInvoiceDialog` ruimt niets op als er alweer een dialoog open staat | `@hide` van Quasar vuurt vertraagd, een sluitende oude dialoog mag de lezer van de nieuwe cyclus niet afbreken |
+
+**Restrisico**: de invoice bij de klant wordt nog steeds aangemaakt vóór
+`execute_withdraw` draait. Faalt die stap alsnog, bijvoorbeeld door saldo dat
+zakt tussen bevestiging en tik, dan blijft er opnieuw een onbetaalde invoice
+achter. Zeldzamer, maar niet nul.
