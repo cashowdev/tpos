@@ -214,3 +214,41 @@ fout die in deze fork geïntroduceerd is.
 `execute_withdraw` draait. Faalt die stap alsnog, bijvoorbeeld door saldo dat
 zakt tussen bevestiging en tik, dan blijft er opnieuw een onbetaalde invoice
 achter. Zeldzamer, maar niet nul.
+
+---
+
+## v1.5.0-cashow.9
+
+Wisselgeldhulp bij een cash-afrekening. De kassier tikt de ontvangen coupures
+aan en het wisselgeld verschijnt. **Puur een rekenhulp**: het bedrag dat naar
+LNbits gaat blijft het factuurbedrag, ontvangen en wisselgeld worden nergens
+bewaard, en er is geen API-wijziging of migratie.
+
+### `static/components/cash-dialog.js` (nieuw)
+
+| # | Wat | Reden |
+|---|---|---|
+| 1 | Component `tpos-cash-dialog` in een eigen bestand | upstream raakt het cash-blok in `dialogs.html` geregeld aan. Door het werk in een nieuw bestand te zetten blijft de kans op rebase-conflicten vrijwel nul |
+| 2 | Briefjes 5, 10, 20, 50 en munten 0,50, 1, 2 | de vier briefjes uit het design, aangevuld met munten omdat een bedrag als 24,50 in de praktijk ook met munten betaald wordt |
+| 3 | Telbadge per coupure en een min-knop eronder | de kassier kan een verkeerde tik corrigeren zonder alles te wissen |
+| 4 | `Exact amount` en een resetknop | gepaste betaling in één tik, en snel opnieuw beginnen |
+| 5 | Te weinig ontvangen toont `Still to receive` in oranje, genoeg toont `Change` in het groen | "wisselgeld min drie euro" leest aan een toog slecht |
+| 6 | Rekent intern in hele eurocenten | geen afrondingsfouten door kommagetallen |
+| 7 | Vertaalt op de rand via `unitsPerEuro` | `formatAmount` deelt door de schaal van de serverdenominatie zodra die geen sats is. Zonder die vertaling zouden de coupures niet kloppen op een instance waar bedragen in centen staan |
+
+### `templates/tpos/dialogs.html`
+
+| # | Wijziging | Reden |
+|---|---|---|
+| 1 | De cash-tak roept het component aan, met `:key` op de payment hash | zo start elke betaling met een leeg briefjesoverzicht |
+| 2 | De custom-tak (QR sticker) staat nu apart en blijft ongewijzigd | wisselgeld slaat alleen op cash |
+| 3 | De regel met het bedrag zonder fooi is uit de cash-modal verdwenen | overbodig naast het grote te betalen bedrag |
+
+**VALIDATE blijft altijd klikbaar**, ook zonder aangetikte coupures. Wie snel
+wil afrekenen hoeft de hulp niet te gebruiken.
+
+### `templates/tpos/tpos.html`
+
+| # | Wijziging | Reden |
+|---|---|---|
+| 1 | Bestand door prettier gehaald | de `.quickfixjohn`-CSS miste een spatie, inspringing en een puntkomma. Alleen opmaak, geen gedrag. Zolang het bestand niet schoon was gaf `prettier --check` altijd een waarschuwing, waardoor een echte opmaakfout niet meer zou opvallen |
