@@ -6,6 +6,10 @@
 // Staat bewust in een eigen bestand in plaats van in dialogs.html, zodat een
 // rebase op upstream hier niet op botst.
 //
+// De terminal staat op een toestel met beperkte schermhoogte, dus de modal
+// blijft zo kort mogelijk: geen titel, kleine marges, en ontvangen en
+// wisselgeld naast elkaar op één rij.
+//
 // Let op: in een component-template gelden de standaard Vue-delimiters, niet
 // de ${ } van de pagina-templates. Daarom overal v-text en :label.
 window.app.component('tpos-cash-dialog', {
@@ -33,13 +37,12 @@ window.app.component('tpos-cash-dialog', {
         {cents: 100, label: '1'},
         {cents: 200, label: '2'}
       ],
-      counts: {},
-      exact: false
+      counts: {}
     }
   },
   computed: {
-    title() {
-      return `${this.methodLabel} ${this.currency}`
+    toPayCaption() {
+      return `${this.methodLabel} TO PAY`
     },
     // cashow: formatAmount deelt door de schaal van de serverdenominatie
     // zodra die geen sats is. In dat geval staan bedragen in minor units en
@@ -56,7 +59,6 @@ window.app.component('tpos-cash-dialog', {
       return Math.round(euro * 100)
     },
     receivedCents() {
-      if (this.exact) return this.toPayCents
       return Object.keys(this.counts).reduce(
         (total, cents) => total + Number(cents) * this.counts[cents],
         0
@@ -66,7 +68,7 @@ window.app.component('tpos-cash-dialog', {
       return this.formatCents(this.receivedCents)
     },
     hasInput() {
-      return this.exact || this.receivedCents > 0
+      return this.receivedCents > 0
     },
     differenceCents() {
       return this.receivedCents - this.toPayCents
@@ -75,9 +77,12 @@ window.app.component('tpos-cash-dialog', {
       return this.hasInput && this.differenceCents < 0
     },
     differenceLabel() {
-      return this.isShort ? 'Still to receive' : 'Change'
+      return this.isShort ? 'STILL TO RECEIVE' : 'CHANGE'
     },
     differenceFormatted() {
+      // zonder ingetikte coupures is het wisselgeld nog niets, anders zou hier
+      // het volle bedrag staan alsof de kassier dat moet teruggeven
+      if (!this.hasInput) return this.formatCents(0)
       return this.formatCents(Math.abs(this.differenceCents))
     },
     differenceClass() {
@@ -93,8 +98,6 @@ window.app.component('tpos-cash-dialog', {
       return this.counts[cents] || 0
     },
     add(cents) {
-      // een tik op een coupure laat "exact" los, de kassier telt nu zelf
-      this.exact = false
       this.counts[cents] = this.countFor(cents) + 1
     },
     remove(cents) {
@@ -102,44 +105,28 @@ window.app.component('tpos-cash-dialog', {
       if (current <= 0) return
       this.counts[cents] = current - 1
     },
-    setExact() {
-      this.counts = {}
-      this.exact = true
-    },
     reset() {
       this.counts = {}
-      this.exact = false
     }
   },
   template: `
-    <div class="text-center q-mb-md full-width">
-      <h3 class="q-mt-none q-mb-lg" v-text="title"></h3>
-
-      <div class="text-caption text-grey-6">TO PAY</div>
+    <div class="text-center q-mb-sm full-width">
+      <div class="text-caption text-grey-6" v-text="toPayCaption"></div>
       <h3
-        class="q-mt-xs q-mb-lg"
+        class="q-mt-none q-mb-sm"
         v-text="activePaymentAmountWithTipFormatted"
       ></h3>
 
-      <div class="row items-center q-mb-sm">
-        <div class="text-caption text-grey-6">NOTES RECEIVED</div>
+      <div class="row items-center q-mb-xs">
+        <div class="text-caption text-grey-6">NOTES</div>
         <q-space></q-space>
         <q-btn
           outline
-          rounded
-          no-caps
-          size="sm"
-          color="grey-5"
-          label="Exact amount"
-          @click="setExact"
-        ></q-btn>
-        <q-btn
-          outline
           round
+          dense
           size="sm"
           color="grey-5"
           icon="restart_alt"
-          class="q-ml-sm"
           aria-label="Reset"
           @click="reset"
         ></q-btn>
@@ -149,9 +136,11 @@ window.app.component('tpos-cash-dialog', {
         <div class="col-3" v-for="note in notes" :key="note.cents">
           <q-btn
             unelevated
-            class="full-width q-py-md"
+            no-caps
+            class="full-width text-h6 text-weight-bold q-py-xs"
             text-color="white"
             :style="{backgroundColor: note.color}"
+            :label="'€ ' + note.label"
             @click="add(note.cents)"
           >
             <q-badge
@@ -161,10 +150,6 @@ window.app.component('tpos-cash-dialog', {
               text-color="black"
               :label="countFor(note.cents)"
             ></q-badge>
-            <div class="column items-center">
-              <span class="text-h5 text-weight-bold" v-text="note.label"></span>
-              <span style="font-size: 0.6rem">EURO</span>
-            </div>
           </q-btn>
           <q-btn
             outline
@@ -172,7 +157,7 @@ window.app.component('tpos-cash-dialog', {
             size="sm"
             color="grey-6"
             icon="remove"
-            class="q-mt-xs"
+            class="full-width q-mt-xs"
             :disable="!countFor(note.cents)"
             :aria-label="'Remove ' + note.label + ' euro'"
             @click="remove(note.cents)"
@@ -180,7 +165,7 @@ window.app.component('tpos-cash-dialog', {
         </div>
       </div>
 
-      <div class="row q-col-gutter-sm q-mt-sm justify-center">
+      <div class="row q-col-gutter-sm q-mt-xs justify-center">
         <div class="col-3" v-for="coin in coins" :key="coin.cents">
           <q-btn
             outline
@@ -206,7 +191,7 @@ window.app.component('tpos-cash-dialog', {
             size="sm"
             color="grey-7"
             icon="remove"
-            class="q-mt-xs"
+            class="full-width q-mt-xs"
             :disable="!countFor(coin.cents)"
             :aria-label="'Remove ' + coin.label + ' euro'"
             @click="remove(coin.cents)"
@@ -214,33 +199,28 @@ window.app.component('tpos-cash-dialog', {
         </div>
       </div>
 
-      <q-card flat bordered class="q-mt-lg q-pa-md text-left">
-        <div class="row items-center">
-          <div class="text-caption text-grey-6">RECEIVED</div>
-          <q-space></q-space>
-          <div class="text-h6" v-text="receivedFormatted"></div>
-        </div>
-        <q-separator class="q-my-sm"></q-separator>
-        <div class="row items-center">
-          <div v-if="!hasInput" class="col text-caption text-grey-6">
-            Tap the notes the customer hands you.<br />
-            The change is calculated automatically.
+      <q-card flat bordered class="q-mt-sm q-pa-sm">
+        <div class="row items-stretch no-wrap text-left">
+          <div class="col row items-center">
+            <div class="text-caption text-grey-6 q-mr-sm">RECEIVED</div>
+            <div class="text-h6" v-text="receivedFormatted"></div>
           </div>
-          <div
-            v-else
-            class="col text-caption text-grey-6"
-            v-text="differenceLabel"
-          ></div>
-          <q-space></q-space>
-          <div
-            class="text-h5 text-weight-bold"
-            :class="differenceClass"
-            v-text="differenceFormatted"
-          ></div>
+          <q-separator vertical class="q-mx-sm"></q-separator>
+          <div class="col row items-center">
+            <div
+              class="text-caption text-grey-6 q-mr-sm"
+              v-text="differenceLabel"
+            ></div>
+            <div
+              class="text-h6 text-weight-bold"
+              :class="differenceClass"
+              v-text="differenceFormatted"
+            ></div>
+          </div>
         </div>
       </q-card>
 
-      <div class="row items-center q-mt-lg">
+      <div class="row items-center q-mt-md">
         <q-btn
           color="primary"
           :loading="validating"
