@@ -279,3 +279,44 @@ berekening of de communicatie met LNbits is gewijzigd.
 De labels staan op `STILL TO RECEIVE` en `CHANGE` in kapitalen, in lijn met de
 andere captions in de modal. Oranje bij te weinig, groen bij genoeg, grijs
 zolang er niets is aangetikt.
+
+---
+
+## v1.5.0-cashow.11
+
+Twee instellingen voor de operator die eigenlijk in de TPoS-config horen,
+maar daar nu niet kunnen zonder databasemigratie. Ze staan daarom in de
+`localStorage` van het toestel, per TPoS-id:
+
+| Sleutel | Standaard |
+|---|---|
+| `cashow.tpos.<tpos-id>.printDialog` | `true` |
+| `cashow.tpos.<tpos-id>.cartPinned` | `false` |
+
+Elke terminal heeft dus zijn eigen keuze. Wie de browserdata wist, valt terug
+op de standaard. Zodra een migratie wel kan, horen beide als veld in de
+TPoS-config.
+
+### Print-dialoog terug, met checkbox
+
+Draait de print-wijziging uit cashow.7 terug.
+
+| # | Bestand | Wijziging | Reden |
+|---|---|---|---|
+| 1 | `static/js/tpos.js` | `finalizeSuccessfulPayment` opent de print-dialoog weer als `enablePrint && printDialogEnabled` | als printen op de instance aan staat, moet de dialoog standaard weer verschijnen |
+| 2 | `templates/tpos/_cart.html` | Checkbox `Print dialog` op de plek van het filter, alleen als printen op de instance aan staat | de operator kan hem per terminal uitzetten |
+| 3 | `templates/tpos/_cart.html` | Het filter krijgt de Quasar-klasse `hidden` | niet nodig op de terminals. Verder ongewijzigd, dus de klasse weghalen brengt het terug |
+
+### Checkout-drawer vastpinnen
+
+| # | Bestand | Wijziging | Reden |
+|---|---|---|---|
+| 1 | `templates/tpos/_cart.html` | Ronde knop met `push_pin` linksboven in de drawer, oranje als hij vastgepind is | |
+| 2 | `static/js/tpos.js` | `showComplete()` sluit een vastgepinde drawer niet meer | dat deed hij na elke betaling op schermen smaller dan 1440 px, de hoofdoorzaak van het "vanzelf verdwijnen" |
+| 3 | `templates/tpos/_cart.html` | Vastgepind verdwijnt het kruisje | |
+| 4 | `static/js/tpos.js` | `toggleCartDrawer()`: de Checkout-knop opent een vastgepinde drawer, maar sluit hem niet | |
+| 5 | `static/js/tpos.js` | De pin is er alleen boven 1024 px (`canPinCart`) | daaronder is de drawer een overlay over het itemgrid. Op mobiel wil je hem nooit permanent open |
+
+Vastgepind en breed genoeg gaat de drawer bij het laden meteen open. Draait
+een tablet onder 1024 px, dan gedraagt hij zich als vroeger. Komt hij weer
+erboven, dan gaat de drawer terug open.
