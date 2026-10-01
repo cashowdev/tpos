@@ -252,3 +252,30 @@ wil afrekenen hoeft de hulp niet te gebruiken.
 | # | Wijziging | Reden |
 |---|---|---|
 | 1 | Bestand door prettier gehaald | de `.quickfixjohn`-CSS miste een spatie, inspringing en een puntkomma. Alleen opmaak, geen gedrag. Zolang het bestand niet schoon was gaf `prettier --check` altijd een waarschuwing, waardoor een echte opmaakfout niet meer zou opvallen |
+
+---
+
+## v1.5.0-cashow.10
+
+Opmaakronde op de cash-modal. De terminal staat op een toestel met beperkte
+schermhoogte, dus de modal moet zo kort mogelijk blijven. Niets in de
+berekening of de communicatie met LNbits is gewijzigd.
+
+### `static/components/cash-dialog.js`
+
+| # | Wijziging | Reden |
+|---|---|---|
+| 1 | De titel `CASH EUR` is weg | de methode staat nu in de caption boven het bedrag, dus een eigen titelregel kost alleen hoogte |
+| 2 | `TO PAY` wordt `CASH TO PAY`, opgebouwd uit `methodLabel` | duidelijk waar het bedrag over gaat, zonder de methode hard in de tekst te zetten |
+| 3 | Het bedrag krijgt `q-mb-sm` in plaats van `q-mb-lg` | hoogte |
+| 4 | `NOTES RECEIVED` wordt `NOTES` | korter, en "received" staat al onderaan |
+| 5 | De coupures tonen `€ 5`, `€ 10`, `€ 20`, `€ 50` in plaats van het getal met `EURO` eronder | het valutateken ervoor leest sneller, en de knoppen worden één regel hoog en alle vier even groot |
+| 6 | De knop `Exact amount` is verdwenen, samen met de `exact`-state en `setExact()` | de kassier tikt in de praktijk toch de coupures aan. De state eromheen was daarmee dode code |
+| 7 | `RECEIVED` en `CHANGE` staan naast elkaar op één rij met een verticale separator ertussen | scheelt een regel plus een horizontale separator |
+| 8 | De hinttekst "Tap the notes the customer hands you" is weg | hoogte. De knoppen spreken voor zich |
+| 9 | Zonder aangetikte coupures staat het wisselgeld op `€ 0,00` in plaats van op het volle bedrag | anders leest de startstand als "geef het hele bedrag terug" |
+| 10 | De min-knoppen staan op `full-width` | ze lijnen nu uit onder de coupure waar ze bij horen |
+
+De labels staan op `STILL TO RECEIVE` en `CHANGE` in kapitalen, in lijn met de
+andere captions in de modal. Oranje bij te weinig, groen bij genoeg, grijs
+zolang er niets is aangetikt.
