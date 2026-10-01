@@ -176,6 +176,8 @@ window.app = Vue.createApp({
       totalfsat: 0,
       addedAmount: 0,
       enablePrint: false,
+      // cashow: lokale voorkeur per terminal, standaard aan
+      printDialogEnabled: true,
       enableRemote: false,
       wrapperMode: false,
       receiptData: null,
@@ -1150,11 +1152,11 @@ window.app = Vue.createApp({
       this.invoiceDialog.internalMemo = null
       this.clearCart()
       this.showComplete()
-      // cashow: de print-dialoog niet meer automatisch openen na een betaling.
-      // Printen blijft mogelijk via de bonnenhistoriek, waar de knoppen
-      // printReceipt en printOrderReceipt rechtstreeks aangeroepen worden.
-      // promptPrintType en printDialog blijven bewust staan, zodat deze
-      // wijziging één regel blijft bij een rebase op upstream.
+      // cashow: de operator kan de print-dialoog per terminal uitzetten via
+      // de checkbox "Print dialog" boven het itemgrid
+      if (this.enablePrint && this.printDialogEnabled) {
+        this.promptPrintType(paymentHash)
+      }
     },
     startPaymentChecker(paymentHash) {
       if (this.invoiceDialog.paymentChecker) {
@@ -1457,6 +1459,31 @@ window.app = Vue.createApp({
         })
         .catch(err => console.error(err))
     },
+    // cashow: voorkeuren die eigenlijk in de TPoS-config horen, maar daar
+    // kunnen ze nu niet zonder databasemigratie. Ze staan daarom in de
+    // localStorage van het toestel, per TPoS-id.
+    cashowPrefKey(name) {
+      return `cashow.tpos.${this.tposId}.${name}`
+    },
+    cashowPref(name, fallback) {
+      try {
+        const value = this.$q.localStorage.getItem(this.cashowPrefKey(name))
+        return value === null || value === undefined ? fallback : value
+      } catch (error) {
+        return fallback
+      }
+    },
+    setCashowPref(name, value) {
+      try {
+        this.$q.localStorage.set(this.cashowPrefKey(name), value)
+      } catch (error) {
+        console.debug('cashow: voorkeur niet bewaard', error)
+      }
+    },
+    setPrintDialogEnabled(value) {
+      this.printDialogEnabled = Boolean(value)
+      this.setCashowPref('printDialog', this.printDialogEnabled)
+    },
     handleColorScheme(val) {
       this.$q.localStorage.set('lnbits.tpos.color', val)
     },
@@ -1711,6 +1738,7 @@ window.app = Vue.createApp({
     this.tposLNaddress = tpos.lnaddress
     this.tposLNaddressCut = tpos.lnaddress_cut
     this.enablePrint = tpos.enable_receipt_print
+    this.printDialogEnabled = this.cashowPref('printDialog', true)
     this.enableRemote = Boolean(tpos.enable_remote)
     this.wrapperMode =
       new URL(window.location.href).searchParams.get('wrapper') === 'true'

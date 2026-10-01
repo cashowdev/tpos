@@ -153,8 +153,10 @@
     ></q-btn>
     <q-space></q-space>
     <!-- middle: grows -->
+    <!-- cashow: filter verborgen met de Quasar-klasse "hidden". Haal die klasse
+         weg om het filter terug te brengen. -->
     <q-input
-      class="col-6 col-sm-4 col-md-3 col-lg-2"
+      class="hidden col-6 col-sm-4 col-md-3 col-lg-2"
       v-model="searchTerm"
       label="Filter"
       dense
@@ -166,6 +168,15 @@
         class="cursor-pointer"
       ></q-icon>
     </q-input>
+    <!-- cashow: print-dialoog na betaling aan of uit, lokaal per terminal -->
+    <q-checkbox
+      v-if="enablePrint"
+      class="col-auto"
+      :model-value="printDialogEnabled"
+      @update:model-value="setPrintDialogEnabled"
+      color="primary"
+      label="Print dialog"
+    ></q-checkbox>
     <div class="col-auto lt-lg">{% include "tpos/_options_fab.html" %}</div>
 
     <!-- categories: drop under on xs -->
