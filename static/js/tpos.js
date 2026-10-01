@@ -161,6 +161,8 @@ window.app = Vue.createApp({
       monochrome: this.$q.localStorage.getItem('lnbits.tpos.color') || false,
       showPoS: true,
       cartDrawer: this.$q.screen.gt.md,
+      // cashow: checkout-drawer vastgepind, lokale voorkeur per terminal
+      cartPinned: false,
       searchTerm: '',
       categoryFilter: '',
       cart: new Map(),
@@ -213,6 +215,11 @@ window.app = Vue.createApp({
     }
   },
   watch: {
+    // cashow: wordt het scherm breed genoeg en is de drawer vastgepind,
+    // zet hem dan open (bv. na het draaien van een tablet)
+    cartPinnedActive(active) {
+      if (active) this.cartDrawer = true
+    },
     stack: {
       handler() {
         if (!this.stack.length) {
@@ -331,6 +338,15 @@ window.app = Vue.createApp({
     },
     drawerWidth() {
       return this.$q.screen.lt.sm ? 360 : 450
+    },
+    // cashow: vastpinnen kan alleen boven de breakpoint van de drawer (1024).
+    // Daaronder is de drawer een overlay over het itemgrid, en daar wil je
+    // hem nooit permanent open.
+    canPinCart() {
+      return this.$q.screen.width > 1024
+    },
+    cartPinnedActive() {
+      return this.cartPinned && this.canPinCart
     },
     drawerItemsHeight() {
       return `overflow-y: auto; height: ${this.$q.screen.gt.sm ? 'calc(100vh - 400px)' : 'calc(100vh - 465px)'}`
@@ -1484,6 +1500,16 @@ window.app = Vue.createApp({
       this.printDialogEnabled = Boolean(value)
       this.setCashowPref('printDialog', this.printDialogEnabled)
     },
+    toggleCartPinned() {
+      this.cartPinned = !this.cartPinned
+      this.setCashowPref('cartPinned', this.cartPinned)
+      if (this.cartPinnedActive) this.cartDrawer = true
+    },
+    // cashow: de Checkout-knop opent de drawer altijd, maar sluit hem niet
+    // als hij vastgepind is
+    toggleCartDrawer() {
+      this.cartDrawer = this.cartPinnedActive ? true : !this.cartDrawer
+    },
     handleColorScheme(val) {
       this.$q.localStorage.set('lnbits.tpos.color', val)
     },
@@ -1538,7 +1564,7 @@ window.app = Vue.createApp({
     },
     showComplete() {
       this.complete.show = true
-      if (this.$q.screen.lt.lg && this.cartDrawer) {
+      if (this.$q.screen.lt.lg && this.cartDrawer && !this.cartPinnedActive) {
         this.cartDrawer = false
       }
     },
@@ -1739,6 +1765,8 @@ window.app = Vue.createApp({
     this.tposLNaddressCut = tpos.lnaddress_cut
     this.enablePrint = tpos.enable_receipt_print
     this.printDialogEnabled = this.cashowPref('printDialog', true)
+    this.cartPinned = this.cashowPref('cartPinned', false) === true
+    if (this.cartPinnedActive) this.cartDrawer = true
     this.enableRemote = Boolean(tpos.enable_remote)
     this.wrapperMode =
       new URL(window.location.href).searchParams.get('wrapper') === 'true'

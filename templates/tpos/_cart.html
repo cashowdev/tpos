@@ -8,7 +8,22 @@
     :breakpoint="1024"
   >
     <div class="row full-width q-pa-md">
-      <div class="absolute-top-right q-pa-md">
+      <!-- cashow: drawer vastpinnen, alleen op brede schermen -->
+      <div class="absolute-top-left q-pa-md" v-if="canPinCart">
+        <q-btn
+          round
+          icon="push_pin"
+          :flat="!cartPinned"
+          :unelevated="cartPinned"
+          :color="cartPinned ? 'primary' : 'grey-7'"
+          :aria-pressed="cartPinned ? 'true' : 'false'"
+          @click="toggleCartPinned"
+          ><q-tooltip
+            v-text="cartPinned ? 'Unpin Cart' : 'Pin Cart'"
+          ></q-tooltip
+        ></q-btn>
+      </div>
+      <div class="absolute-top-right q-pa-md" v-if="!cartPinnedActive">
         <q-btn @click="cartDrawer = !cartDrawer" icon="close" flat round
           ><q-tooltip>Hide Cart</q-tooltip></q-btn
         >
@@ -344,7 +359,7 @@
       label="Checkout"
       color="positive"
       style="width: 180px"
-      @click="cartDrawer = !cartDrawer"
+      @click="toggleCartDrawer"
     ></q-btn>
   </q-page-sticky>
 </div>
