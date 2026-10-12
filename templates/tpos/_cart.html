@@ -352,13 +352,13 @@
       </q-item>
     </q-list>
   </div>
-  <q-page-sticky position="bottom" :offset="[0, 22]" v-if="cart.size > 0">
+  <q-page-sticky position="bottom" v-if="cart.size > 0">
     <q-btn
       size="sm"
-      padding="md"
+      padding="lg"
       label="Checkout"
       color="positive"
-      style="width: 180px"
+      style="width: 180px; margin-bottom: 22px;"
       @click="toggleCartDrawer"
     ></q-btn>
   </q-page-sticky>
