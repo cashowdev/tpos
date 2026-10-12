@@ -353,13 +353,24 @@
     </q-list>
   </div>
   <q-page-sticky position="bottom" v-if="cart.size > 0">
-    <q-btn
-      size="sm"
-      padding="lg"
-      label="Checkout"
-      color="positive"
-      style="width: 180px; margin-bottom: 22px;"
-      @click="toggleCartDrawer"
-    ></q-btn>
+    <div class="row items-center no-wrap">
+      <q-btn
+        class="q-mr-md"
+        round
+        size="lg"
+        color="negative"
+        icon="delete"
+        style="margin-bottom: 22px;"
+        @click="clearCart"
+      ></q-btn>
+      <q-btn
+        size="sm"
+        padding="lg"
+        label="Checkout"
+        color="positive"
+        style="width: 180px; margin-bottom: 22px;"
+        @click="toggleCartDrawer"
+      ></q-btn>
+    </div>
   </q-page-sticky>
 </div>
