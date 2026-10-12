@@ -216,7 +216,7 @@
 
   <div class="q-mx-auto q-pa-md" :class="{'dimmed': moreBtn}">
     <!-- Items List Large -->
-    <div v-if="isGridView">
+    <div v-if="isGridView" class="q-mb-xl">
       <!-- xs: 4 per row, fill width -->
       <div class="row q-col-gutter-sm q-mt-md lt-sm">
         <div
@@ -286,7 +286,7 @@
       </div>
     </div>
     <!-- Items List Small -->
-    <q-list v-else class="col-12">
+    <q-list v-else class="col-12 q-mb-xl">
       <q-item
         v-for="item in filteredItems"
         :key="item.id"
