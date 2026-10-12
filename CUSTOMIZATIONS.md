@@ -337,3 +337,19 @@ staan weer zoals in cashow.7. De wijzigingen uit cashow.9 tot en met 11 blijven.
 **Let op**: daarmee zijn ook de twee bugs uit het incident van 26 september
 terug (lezer blijft scherp na het sluiten van de dialoog, en een mislukte
 uitbetaling meldt toch "Withdraw processed successfully").
+
+---
+
+## v1.5.0-cashow.13
+
+Alleen `templates/tpos/_cart.html`. Geen server, geen migratie.
+
+### Checkout-knop en itemoverzicht
+
+| # | Wijziging | Reden |
+|---|---|---|
+| 1 | `:offset="[0, 22]"` van de `q-page-sticky` weg, in de plaats `margin-bottom: 22px` op de knop | Quasar zet de offset als margin op de buitenste div, die `pointer-events: none` heeft. Een tik net onder de knop kwam zo op het product eronder terecht. Binnen de binnenste div wordt die tik wel opgevangen |
+| 2 | Checkout-knop `padding="md"` wordt `padding="lg"` | grotere knop, beter aan te tikken |
+| 3 | Ronde rode knop met icoon `delete` links naast Checkout, roept `clearCart` aan | winkelwagen legen zonder de drawer te openen. Zelfde gedrag als "Clear cart", dus zonder bevestiging |
+| 4 | Beide knoppen in een `row items-center no-wrap`, elk met `margin-bottom: 22px` | naast elkaar en verticaal uitgelijnd |
+| 5 | `q-mb-xl` op de grid-wrapper (`v-if="isGridView"`) en op de `q-list` van de list-mode | het laatste item kan tot boven de knoppen scrollen in plaats van eronder te blijven |
