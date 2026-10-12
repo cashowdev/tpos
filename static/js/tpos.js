@@ -1706,6 +1706,8 @@ window.app = Vue.createApp({
     }
   },
   async created() {
+    // cashow: header bij elke start verborgen, ook als hij vorige keer getoond werd
+    this.$q.localStorage.set('lnbits.tpos.header', 'hidden')
     Quasar.Loading.show()
     this.currency = tpos.currency
     this.amountFormatted = this.formatAmount(this.amount, this.currency)
