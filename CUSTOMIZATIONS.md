@@ -320,3 +320,20 @@ Draait de print-wijziging uit cashow.7 terug.
 Vastgepind en breed genoeg gaat de drawer bij het laden meteen open. Draait
 een tablet onder 1024 px, dan gedraagt hij zich als vroeger. Komt hij weer
 erboven, dan gaat de drawer terug open.
+
+---
+
+## v1.5.0-cashow.12
+
+Draait de ATM/NFC-wijzigingen uit cashow.8 volledig terug, omdat ze nieuwe
+bugs introduceerden. `views_atm.py` en de NFC-logica in `static/js/tpos.js`
+staan weer zoals in cashow.7. De wijzigingen uit cashow.9 tot en met 11 blijven.
+
+| # | Bestand | Wijziging |
+|---|---|---|
+| 1 | `static/js/tpos.js` | Revert van `a12d7dc`: geen `stopNfcReader`, `atmConfirmedSat` en bevestigingspoort meer |
+| 2 | `views_atm.py` | Revert van `dac5afd`: geen controle meer op de charge vóór het aanmaken van de invoice, fout van `execute_withdraw` wordt weer enkel gelogd |
+
+**Let op**: daarmee zijn ook de twee bugs uit het incident van 26 september
+terug (lezer blijft scherp na het sluiten van de dialoog, en een mislukte
+uitbetaling meldt toch "Withdraw processed successfully").
