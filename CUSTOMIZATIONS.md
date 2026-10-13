@@ -364,3 +364,17 @@ Alleen frontend. Geen server, geen migratie.
 |---|---|---|---|
 | 1 | `static/js/tpos.js` | `created()` zet `lnbits.tpos.header` in localStorage terug op `hidden` | de header moet bij elke start verborgen zijn. Voorheen bleef een eerdere keuze voor **Show Header** onthouden. De knop in het menu werkt nog tot de volgende herlaadbeurt |
 | 2 | `templates/tpos/_cart.html` | Container van de `.quickfixjohn`-tegels (grid-mode, sm+) van `justify-center` naar `justify-start` | een onvolledige laatste rij begint links in plaats van gecentreerd |
+
+---
+
+## v1.5.0-cashow.15
+
+Alleen frontend. Geen server, geen migratie.
+
+| # | Bestand | Wijziging | Reden |
+|---|---|---|---|
+| 1 | `static/sounds/payment_confirmation.mp3` | Nieuw bestand | bevestigingsgeluid, mee in de extensie zodat het niet afhangt van een externe server |
+| 2 | `static/js/tpos.js` | `created()` laadt het geluid vooraf, `showComplete()` speelt het af | de betaler hoort dat de betaling gelukt is zonder het vinkje te zien. Klinkt ook na een ATM-uitbetaling |
+
+Weigert de browser of de wrapper-app (WebView) het afspelen, dan verschijnt
+het vinkje gewoon zonder geluid.
