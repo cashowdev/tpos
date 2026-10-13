@@ -353,3 +353,14 @@ Alleen `templates/tpos/_cart.html`. Geen server, geen migratie.
 | 3 | Ronde rode knop met icoon `delete` links naast Checkout, roept `clearCart` aan | winkelwagen legen zonder de drawer te openen. Zelfde gedrag als "Clear cart", dus zonder bevestiging |
 | 4 | Beide knoppen in een `row items-center no-wrap`, elk met `margin-bottom: 22px` | naast elkaar en verticaal uitgelijnd |
 | 5 | `q-mb-xl` op de grid-wrapper (`v-if="isGridView"`) en op de `q-list` van de list-mode | het laatste item kan tot boven de knoppen scrollen in plaats van eronder te blijven |
+
+---
+
+## v1.5.0-cashow.14
+
+Alleen frontend. Geen server, geen migratie.
+
+| # | Bestand | Wijziging | Reden |
+|---|---|---|---|
+| 1 | `static/js/tpos.js` | `created()` zet `lnbits.tpos.header` in localStorage terug op `hidden` | de header moet bij elke start verborgen zijn. Voorheen bleef een eerdere keuze voor **Show Header** onthouden. De knop in het menu werkt nog tot de volgende herlaadbeurt |
+| 2 | `templates/tpos/_cart.html` | Container van de `.quickfixjohn`-tegels (grid-mode, sm+) van `justify-center` naar `justify-start` | een onvolledige laatste rij begint links in plaats van gecentreerd |
