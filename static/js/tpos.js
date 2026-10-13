@@ -1519,6 +1519,11 @@ window.app = Vue.createApp({
     },
     showComplete() {
       this.complete.show = true
+      // cashow: geluid zodat de betaler hoort dat de betaling gelukt is
+      if (this.paymentSound) {
+        this.paymentSound.currentTime = 0
+        this.paymentSound.play().catch(() => {})
+      }
       if (this.$q.screen.lt.lg && this.cartDrawer && !this.cartPinnedActive) {
         this.cartDrawer = false
       }
@@ -1708,6 +1713,11 @@ window.app = Vue.createApp({
   async created() {
     // cashow: header bij elke start verborgen, ook als hij vorige keer getoond werd
     this.$q.localStorage.set('lnbits.tpos.header', 'hidden')
+    // cashow: bevestigingsgeluid vooraf laden, afgespeeld in showComplete()
+    this.paymentSound = new Audio(
+      '/tpos/static/sounds/payment_confirmation.mp3'
+    )
+    this.paymentSound.preload = 'auto'
     Quasar.Loading.show()
     this.currency = tpos.currency
     this.amountFormatted = this.formatAmount(this.amount, this.currency)
